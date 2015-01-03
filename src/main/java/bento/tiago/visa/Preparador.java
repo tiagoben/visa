@@ -6,7 +6,10 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
+
 import org.joda.time.LocalDate;
 
 public class Preparador {
@@ -16,6 +19,8 @@ public class Preparador {
 	}
 
 	private static void prepararComprasParceladas(Fatura fatura) {
+		List<Transacao> parcelasFuturas = new ArrayList<Transacao>();
+		
 		for (Transacao transacao : fatura.getTransacoes()) {
 			String desc = transacao.getDescricao();
 			int indexParc = desc.indexOf(" PARC ");
@@ -23,24 +28,19 @@ public class Preparador {
 				transacao.setParcelado(true);
 				int beginIndexParc = indexParc + 6;
 				int endIndexParc = indexParc + 8;
-				int parcelaAtual = Integer.parseInt(desc.substring(
-						beginIndexParc, endIndexParc));
-				int qtdParcelas = Integer.parseInt(desc.substring(
-						indexParc + 9, indexParc + 11));
+				int parcelaAtual = Integer.parseInt(desc.substring(beginIndexParc, endIndexParc));
+				int qtdParcelas = Integer.parseInt(desc.substring(indexParc + 9, indexParc + 11));
 
 				transacao.setParcelaAtual(parcelaAtual);
 				transacao.setQtdParcelas(qtdParcelas);
 
-				LocalDate dataParcela = transacao.getData().plusMonths(
-						parcelaAtual - 1);
+				LocalDate dataParcela = transacao.getData().plusMonths(parcelaAtual - 1);
 
 				transacao.setDataParcela(dataParcela);
 				if (parcelaAtual == 1) {
 					for (int parcelaProjecao = parcelaAtual + 1; parcelaProjecao <= qtdParcelas; parcelaProjecao++) {
 						StringBuilder sb = new StringBuilder(desc);
-						String parcelaStr = String
-								.format("%02d", new Object[] { Integer
-										.valueOf(parcelaProjecao) });
+						String parcelaStr = String.format("%02d", new Object[] {Integer.valueOf(parcelaProjecao)});
 						sb.replace(beginIndexParc, endIndexParc, parcelaStr);
 
 						Transacao novaTransacao = clonarTransacao(transacao);
@@ -49,12 +49,14 @@ public class Preparador {
 						LocalDate dataParcelaProjecao = novaTransacao.getData()
 								.plusMonths(parcelaProjecao - 1);
 						novaTransacao.setDataParcela(dataParcelaProjecao);
-
-						fatura.addTransacao(novaTransacao);
+						
+						parcelasFuturas.add(novaTransacao);
 					}
 				}
 			}
 		}
+		
+		parcelasFuturas.forEach(novaTransacao -> fatura.addTransacao(novaTransacao));
 	}
 
 	private static void prepararComprasDolar(Fatura fatura) {

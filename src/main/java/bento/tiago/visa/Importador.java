@@ -29,12 +29,12 @@ public class Importador {
 			do {
 				if (StringUtils.isNotBlank(linha)) {
 					switch (status) {
-					case ARQUIVO_INVALIDO:
+					case VERIFICAR_VALIDADE:
 						status = verificarValidade(linha);
 						break;
-					case BUSCAR_DOLAR:
+					case ARQUIVO_INVALIDO:
 						return null;
-					case BUSCAR_TOTAIS:
+					case BUSCAR_VENCIMENTO:
 						status = buscarVencimento(fatura, linha);
 						break;
 					case BUSCAR_TOTAL_FATURA:
@@ -43,13 +43,13 @@ public class Importador {
 					case BUSCAR_TRANSACOES:
 						status = buscarTransacoes(fatura, linha);
 						break;
-					case BUSCAR_VENCIMENTO:
+					case BUSCAR_TOTAIS:
 						status = buscarTotais(fatura, linha);
 						break;
-					case FIM_IMPORTACAO:
+					case BUSCAR_DOLAR:
 						status = buscarDolar(fatura, linha);
 						break;
-					case VERIFICAR_VALIDADE:
+					case FIM_IMPORTACAO:
 						emProcessamento = false;
 					}
 				}
@@ -79,7 +79,7 @@ public class Importador {
 	}
 
 	private Status verificarValidade(String linha) {
-		if (linha.indexOf("SISBB - Sistema de Informa") >= 0) {
+		if (linha.indexOf("SISBB") >= 0) {
 			return Status.BUSCAR_VENCIMENTO;
 		}
 		return Status.ARQUIVO_INVALIDO;
