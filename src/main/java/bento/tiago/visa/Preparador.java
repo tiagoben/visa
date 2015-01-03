@@ -90,7 +90,7 @@ public class Preparador {
 				}
 			}
 		}
-		if (!emAberto) {
+		if (!emAberto && maiorTransacao!=null) {
 			BigDecimal diferenca = fatura.getTotalDolarConvertido().subtract(
 					somaConversao);
 			BigDecimal novoValorDoMaior = maiorTransacao.getValorConvertido()
